@@ -48,13 +48,16 @@ public:
     explicit bounded_enum(EnumT val): m_val { std::move(val) }{}
     
     // 3. Copy ctor
-    
+    bounded_enum(const bounded_enum& other) = default;
     
     // 4. Copy Assign
+    bounded_enum& operator=(const bounded_enum& other) = default;
     
     // 5. Move Ctor
+    bounded_enum(bounded_enum&& other) = default;
     
     // 6. Move assign
+    bounded_enum& operator=(bounded_enum&& other) = default;
     
 
     //=======================
