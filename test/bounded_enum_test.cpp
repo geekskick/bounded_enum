@@ -184,3 +184,13 @@ TEST_CASE("== and !="){
     REQUIRE(a != alphabet::e);
     REQUIRE(a != uut{alphabet::e});
 }
+
+TEST_CASE("Iterate"){
+    enum class alphabet{a,b,c,d,e};
+    using uut = bounded_enum<alphabet, alphabet::a, alphabet::e>;
+    uut a{alphabet::d};
+    int i{};
+    for(const auto& it: a){
+        REQUIRE(uut{it}.underlying() == i++);
+    }
+}

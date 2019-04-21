@@ -17,6 +17,7 @@ public:
     bool operator==(const bounded_iterator& other) const {
         return m_parent_idx == other.m_parent_idx;
     }
+    
     bool operator!=(const bounded_iterator& other) const {
         return m_parent_idx != other.m_parent_idx;
     }
@@ -88,7 +89,6 @@ public:
     constexpr static ULtype to_underlying(const EnumT& e) { return static_cast<ULtype>(e); }
     constexpr static EnumT from_underlying(const ULtype& u) { return static_cast<EnumT>(u); }
 
-
     friend std::ostream& operator<<(std::ostream& os, const bounded_enum& other){
         os << other.underlying();
         return os;
@@ -110,8 +110,6 @@ public:
     bool operator!=(const EnumT& rhs) const {
         return m_val != rhs;
     }
-
-
 
     bounded_enum& operator++() {
         if(m_val == TMax){
