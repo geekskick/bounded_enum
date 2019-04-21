@@ -4,6 +4,8 @@
 //
 
 #include <type_traits>
+#include <sstream>
+#include <exception>
 
 template<class ULType>
 class bounded_iterator{
@@ -113,11 +115,11 @@ public:
 
     bounded_enum& operator++() {
         if(m_val == TMax){
-            m_val = TMin;
+            std::stringstream ss;
+            ss << "Trying to increment " << to_underlying(m_val) <<" past it's max.";
+            throw std::runtime_error(ss.str());
         }
-        else{
-            m_val = from_underlying(to_underlying(m_val) + 1);
-        }
+        m_val = from_underlying(to_underlying(m_val) + 1);
         return *this;
     }
 
@@ -129,11 +131,11 @@ public:
 
     bounded_enum& operator--() {
         if(m_val == TMin){
-            m_val = TMax;
+            std::stringstream ss;
+            ss << "Trying to decrement " << to_underlying(m_val) << " past it's min.";
+            throw std::runtime_error(ss.str());
         }
-        else{
-            m_val = from_underlying(to_underlying(m_val) - 1);
-        }
+        m_val = from_underlying(to_underlying(m_val) - 1);
         return *this;
     }
 

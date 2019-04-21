@@ -116,8 +116,8 @@ TEST_CASE("Postfix increment"){
     REQUIRE(a.get() == alphabet::d);
     a++;
     REQUIRE(a.get() == alphabet::e);
-    a++;
-    REQUIRE(a.get() == alphabet::a);
+    REQUIRE_THROWS(a++);
+
 }
 
 TEST_CASE("Prefix increment"){
@@ -134,8 +134,8 @@ TEST_CASE("Prefix increment"){
     REQUIRE(a.get() == alphabet::d);
     ++a;
     REQUIRE(a.get() == alphabet::e);
-    ++a;
-    REQUIRE(a.get() == alphabet::a);
+    REQUIRE_THROWS(++a);
+
 }
 
 TEST_CASE("Postfix decrement"){
@@ -152,8 +152,8 @@ TEST_CASE("Postfix decrement"){
     REQUIRE(a.get() == alphabet::b);
     a--;
     REQUIRE(a.get() == alphabet::a);
-    a--;
-    REQUIRE(a.get() == alphabet::e);
+    REQUIRE_THROWS(a--);
+
 }
 
 TEST_CASE("Prefix decrement"){
@@ -170,8 +170,7 @@ TEST_CASE("Prefix decrement"){
     REQUIRE(a.get() == alphabet::b);
     --a;
     REQUIRE(a.get() == alphabet::a);
-    --a;
-    REQUIRE(a.get() == alphabet::e);
+    REQUIRE_THROWS(--a);
 }
 
 TEST_CASE("== and !="){
