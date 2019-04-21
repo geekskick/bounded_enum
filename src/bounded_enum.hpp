@@ -44,7 +44,7 @@ public:
     
     // 2. ctor
     bounded_enum() = default;
-    explicit bounded_enum(ULtype val): m_val { static_cast<EnumT>(val) }{}
+    explicit bounded_enum(ULtype val): m_val { from_underlying(val) }{}
     explicit bounded_enum(EnumT val): m_val { std::move(val) }{}
     
     // 3. Copy ctor
@@ -54,11 +54,23 @@ public:
     bounded_enum& operator=(const bounded_enum& other) = default;
     
     // 5. Move Ctor
-    bounded_enum(bounded_enum&& other) = default;
-    
+    bounded_enum(bounded_enum&& other) {
+        if(this != &other){
+            m_val = other.m_val;
+            other.m_val = other.min_enum;
+        }
+    }
+
     // 6. Move assign
-    bounded_enum& operator=(bounded_enum&& other) = default;
+    bounded_enum& operator=(bounded_enum&& other) {
+        if(this != &other){
+            m_val = other.m_val;
+            other.m_val = other.min_enum;
+        }
+        return *this;
+    }
     
+    // 7. Swap not done yet
 
     //=======================
     ULtype underlying() const { return static_cast<ULtype>(m_val); }
@@ -70,19 +82,67 @@ public:
     
     constexpr EnumT& operator*() { return m_val; }
     constexpr const EnumT* operator*() const { return m_val; }
-    
+    constexpr const EnumT& get() const { return m_val; }
+    constexpr EnumT& get() { return m_val; }
+
+    constexpr static ULtype to_underlying(const EnumT& e) { return static_cast<ULtype>(e); }
+    constexpr static EnumT from_underlying(const ULtype& u) { return static_cast<EnumT>(u); }
+
+
     friend std::ostream& operator<<(std::ostream& os, const bounded_enum& other){
         os << other.underlying();
         return os;
     }
     
     //=======================
-    bounded_enum operator + (const bounded_enum& rhs) const {
-        return bounded_enum(underlying() + rhs.underlying());
+    bool operator==(const bounded_enum& rhs) const {
+        return m_val == rhs.m_val;
     }
-    
-    bounded_enum operator - (const bounded_enum& rhs) const {
-        return bounded_enum(underlying() - rhs.underlying());
+
+    bool operator==(const EnumT& rhs) const {
+        return m_val == rhs;
+    }
+
+    bool operator!=(const bounded_enum& rhs) const {
+        return m_val != rhs.m_val;
+    }
+
+    bool operator!=(const EnumT& rhs) const {
+        return m_val != rhs;
+    }
+
+
+
+    bounded_enum& operator++() {
+        if(m_val == TMax){
+            m_val = TMin;
+        }
+        else{
+            m_val = from_underlying(to_underlying(m_val) + 1);
+        }
+        return *this;
+    }
+
+    bounded_enum operator++(int) {
+        bounded_enum t = *this;
+        ++*this;
+        return t;
+    }
+
+    bounded_enum& operator--() {
+        if(m_val == TMin){
+            m_val = TMax;
+        }
+        else{
+            m_val = from_underlying(to_underlying(m_val) - 1);
+        }
+        return *this;
+    }
+
+    bounded_enum operator--(int) {
+        bounded_enum t = *this;
+        --*this;
+        return t;
     }
 
     //====== Iterators ======
