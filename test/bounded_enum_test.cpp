@@ -8,6 +8,17 @@ TEST_CASE("Can default initialise"){
     uut a;
 }
 
+TEST_CASE("Throws on invalid"){
+    enum class alphabet{a,b,c,d,e};
+    using uut = bounded_enum<alphabet, alphabet::a, alphabet::e>;
+    REQUIRE_NOTHROW(uut{0});
+    REQUIRE_NOTHROW(uut{1});
+    REQUIRE_NOTHROW(uut{2});
+    REQUIRE_NOTHROW(uut{3});
+    REQUIRE_NOTHROW(uut{4});
+    REQUIRE_THROWS(uut{5});
+}
+
 TEST_CASE("Can get enum out, and initialised correctly"){
     enum class alphabet{a,b,c,d,e};
     using uut = bounded_enum<alphabet, alphabet::a, alphabet::e>;

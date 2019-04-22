@@ -47,7 +47,16 @@ public:
     
     // 2. ctor
     bounded_enum() = default;
-    explicit bounded_enum(ULtype val): m_val { from_underlying(val) }{}
+
+    explicit bounded_enum(ULtype val){
+        if(val > to_underlying(TMax) || val < to_underlying(TMin)){
+            std::stringstream ss;
+            ss << "Restriction is that " << to_underlying(TMin) << " < " << val << " < " << to_underlying(TMax) << ".";
+            throw std::runtime_error(ss.str());
+        }
+        m_val = from_underlying(val);
+    }
+
     explicit bounded_enum(EnumT val): m_val { std::move(val) }{}
     
     // 3. Copy ctor
