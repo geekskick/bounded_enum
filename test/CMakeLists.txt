@@ -1,5 +1,4 @@
 add_executable(bounded_enum_exec bounded_enum_test.cpp)
-set_target_properties(bounded_enum_exec PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
 
 target_link_libraries(bounded_enum_exec PRIVATE bounded_enum_lib Catch2::Catch2)
 catch_discover_tests(bounded_enum_exec)

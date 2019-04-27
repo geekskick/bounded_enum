@@ -64,10 +64,21 @@ class bounded_enum {
         if (other > TMax || other < TMin) {
             std::stringstream ss;
             ss << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]"
-               << " - assigning an EnumT but be in the range of " << min_underlying << " - " << max_underlying << ".";
+               << " - assigning an EnumT must be in the range of " << min_underlying << " - " << max_underlying << ".";
             throw std::runtime_error(ss.str());
         }
         m_val = other;
+        return *this;
+    }
+
+    bounded_enum& operator=(const ULType& other) {
+        if (other > max_underlying || other < min_underlying) {
+            std::stringstream ss;
+            ss << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]"
+               << " - assigning an EnumT must be in the range of " << min_underlying << " - " << max_underlying << ".";
+            throw std::runtime_error(ss.str());
+        }
+        m_val = from_underlying(other);
         return *this;
     }
 
@@ -110,6 +121,13 @@ class bounded_enum {
     friend std::ostream& operator<<(std::ostream& os, const bounded_enum& other) {
         os << other.underlying();
         return os;
+    }
+
+    friend std::istream& operator>>(std::istream& is, bounded_enum& other) {
+        ULType t;
+        is >> t;
+        other = t;
+        return is;
     }
 
     //=======================
