@@ -12,14 +12,14 @@ template<class ULType>
 class bounded_iterator {
   public:
     bounded_iterator() = delete;
-    explicit bounded_iterator(ULType val)
+    explicit bounded_iterator(ULType val) noexcept
       : m_parent_idx{ std::move(val) } {}
 
     ULType operator*() { return m_parent_idx; }
-    bool operator==(const bounded_iterator& other) const { return m_parent_idx == other.m_parent_idx; }
-    bool operator!=(const bounded_iterator& other) const { return m_parent_idx != other.m_parent_idx; }
+    bool operator==(const bounded_iterator& other) const noexcept { return m_parent_idx == other.m_parent_idx; }
+    bool operator!=(const bounded_iterator& other) const noexcept { return m_parent_idx != other.m_parent_idx; }
 
-    bounded_iterator& operator++() {
+    bounded_iterator& operator++() noexcept {
         m_parent_idx++;
         return *this;
     }
@@ -102,7 +102,7 @@ class bounded_enum {
     // 7. Swap not done yet
 
     //=======================
-    constexpr ULType underlying() const { return static_cast<ULType>(m_val); }
+    constexpr ULType underlying() const noexcept { return static_cast<ULType>(m_val); }
     constexpr static ULType count{ static_cast<ULType>(TMax) + 1 };
     constexpr static ULType max_underlying{ static_cast<ULType>(TMax) };
     constexpr static ULType min_underlying{ static_cast<ULType>(TMin) };
@@ -110,13 +110,13 @@ class bounded_enum {
     constexpr static EnumT min_enum{ TMin };
 
     constexpr EnumT& operator*() { return m_val; }
-    constexpr const EnumT& operator*() const { return m_val; }
+    constexpr const EnumT& operator*() const noexcept { return m_val; }
 
-    constexpr const EnumT& get() const { return m_val; }
-    constexpr EnumT& get() { return m_val; }
+    constexpr const EnumT& get() const noexcept { return m_val; }
+    constexpr EnumT& get() noexcept { return m_val; }
 
-    constexpr static ULType to_underlying(const EnumT& e) { return static_cast<ULType>(e); }
-    constexpr static EnumT from_underlying(const ULType& u) { return static_cast<EnumT>(u); }
+    constexpr static ULType to_underlying(const EnumT& e) noexcept { return static_cast<ULType>(e); }
+    constexpr static EnumT from_underlying(const ULType& u) noexcept { return static_cast<EnumT>(u); }
 
     friend std::ostream& operator<<(std::ostream& os, const bounded_enum& other) {
         os << other.underlying();
@@ -132,18 +132,18 @@ class bounded_enum {
 
     //=======================
     template<EnumT OtherMin, EnumT OtherMax>
-    constexpr bool operator==(const bounded_enum<EnumT, OtherMin, OtherMax>& rhs) const {
+    constexpr bool operator==(const bounded_enum<EnumT, OtherMin, OtherMax>& rhs) const noexcept {
         return *rhs == m_val;
     }
 
     template<EnumT OtherMin, EnumT OtherMax>
-    constexpr bool operator!=(const bounded_enum<EnumT, OtherMin, OtherMax>& rhs) const {
+    constexpr bool operator!=(const bounded_enum<EnumT, OtherMin, OtherMax>& rhs) const noexcept {
         return *rhs != m_val;
     }
-    constexpr bool operator==(const bounded_enum& rhs) const { return m_val == rhs.m_val; }
-    constexpr bool operator==(const EnumT& rhs) const { return m_val == rhs; }
-    constexpr bool operator!=(const bounded_enum& rhs) const { return m_val != rhs.m_val; }
-    constexpr bool operator!=(const EnumT& rhs) const { return m_val != rhs; }
+    constexpr bool operator==(const bounded_enum& rhs) const noexcept { return m_val == rhs.m_val; }
+    constexpr bool operator==(const EnumT& rhs) const noexcept { return m_val == rhs; }
+    constexpr bool operator!=(const bounded_enum& rhs) const noexcept { return m_val != rhs.m_val; }
+    constexpr bool operator!=(const EnumT& rhs) const noexcept { return m_val != rhs; }
 
     //=====================
     bounded_enum& operator++() {
@@ -179,8 +179,8 @@ class bounded_enum {
     }
 
     //====== Iterators ======
-    constexpr static IterType begin() { return IterType(min_underlying); }
-    constexpr static IterType end() { return IterType(count); }
+    constexpr static IterType begin() noexcept { return IterType(min_underlying); }
+    constexpr static IterType end() noexcept { return IterType(count); }
 
   private:
     EnumT m_val{ TMin };
