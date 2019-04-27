@@ -4,6 +4,7 @@
 //
 
 #include <exception>
+#include <iostream>
 #include <sstream>
 #include <type_traits>
 
@@ -45,7 +46,7 @@ class bounded_enum {
     explicit bounded_enum(ULType val) {
         if (val > to_underlying(TMax) || val < to_underlying(TMin)) {
             std::stringstream ss;
-            ss << "Restriction is that " << to_underlying(TMin) << " < " << val << " < " << to_underlying(TMax) << ".";
+            ss << "Restriction is that " << to_underlying(TMin) << " <= " << val << " <= " << to_underlying(TMax) << ".";
             throw std::runtime_error(ss.str());
         }
         m_val = from_underlying(val);
@@ -59,6 +60,16 @@ class bounded_enum {
 
     // 4. Copy Assign
     bounded_enum& operator=(const bounded_enum& other) = default;
+    bounded_enum& operator=(const EnumT& other) {
+        if (other > TMax || other < TMin) {
+            std::stringstream ss;
+            ss << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]"
+               << " - assigning an EnumT but be in the range of " << min_underlying << " - " << max_underlying << ".";
+            throw std::runtime_error(ss.str());
+        }
+        m_val = other;
+        return *this;
+    }
 
     // 5. Move Ctor
     bounded_enum(bounded_enum&& other) {
@@ -80,7 +91,7 @@ class bounded_enum {
     // 7. Swap not done yet
 
     //=======================
-    ULType underlying() const { return static_cast<ULType>(m_val); }
+    constexpr ULType underlying() const { return static_cast<ULType>(m_val); }
     constexpr static ULType count{ static_cast<ULType>(TMax) + 1 };
     constexpr static ULType max_underlying{ static_cast<ULType>(TMax) };
     constexpr static ULType min_underlying{ static_cast<ULType>(TMin) };
@@ -88,11 +99,12 @@ class bounded_enum {
     constexpr static EnumT min_enum{ TMin };
 
     constexpr EnumT& operator*() { return m_val; }
-    constexpr const EnumT* operator*() const { return m_val; }
+    constexpr const EnumT& operator*() const { return m_val; }
+
     constexpr const EnumT& get() const { return m_val; }
     constexpr EnumT& get() { return m_val; }
-    constexpr static ULType to_underlying(const EnumT& e) { return static_cast<ULType>(e); }
 
+    constexpr static ULType to_underlying(const EnumT& e) { return static_cast<ULType>(e); }
     constexpr static EnumT from_underlying(const ULType& u) { return static_cast<EnumT>(u); }
 
     friend std::ostream& operator<<(std::ostream& os, const bounded_enum& other) {
@@ -101,11 +113,21 @@ class bounded_enum {
     }
 
     //=======================
-    bool operator==(const bounded_enum& rhs) const { return m_val == rhs.m_val; }
-    bool operator==(const EnumT& rhs) const { return m_val == rhs; }
-    bool operator!=(const bounded_enum& rhs) const { return m_val != rhs.m_val; }
-    bool operator!=(const EnumT& rhs) const { return m_val != rhs; }
+    template<EnumT OtherMin, EnumT OtherMax>
+    constexpr bool operator==(const bounded_enum<EnumT, OtherMin, OtherMax>& rhs) const {
+        return *rhs == m_val;
+    }
 
+    template<EnumT OtherMin, EnumT OtherMax>
+    constexpr bool operator!=(const bounded_enum<EnumT, OtherMin, OtherMax>& rhs) const {
+        return *rhs != m_val;
+    }
+    constexpr bool operator==(const bounded_enum& rhs) const { return m_val == rhs.m_val; }
+    constexpr bool operator==(const EnumT& rhs) const { return m_val == rhs; }
+    constexpr bool operator!=(const bounded_enum& rhs) const { return m_val != rhs.m_val; }
+    constexpr bool operator!=(const EnumT& rhs) const { return m_val != rhs; }
+
+    //=====================
     bounded_enum& operator++() {
         if (m_val == TMax) {
             std::stringstream ss;
