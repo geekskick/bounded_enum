@@ -121,18 +121,16 @@ TEST_CASE("Can get underlying") {
 TEST_CASE("Max and min correct") {
     enum class alphabet { a, b, c, d, e };
     using uut = bounded_enum<alphabet, alphabet::a, alphabet::e>;
-
-    REQUIRE(uut::max_enum == alphabet::e);
-    REQUIRE(uut::min_enum == alphabet::a);
-    REQUIRE(uut::max_underlying == 4);
-    REQUIRE(uut::min_underlying == 0);
+    REQUIRE(uut::max_enum() == alphabet::e);
+    REQUIRE(uut::min_enum() == alphabet::a);
+    REQUIRE(uut::max_underlying() == 4);
+    REQUIRE(uut::min_underlying() == 0);
 }
 
 TEST_CASE("Count correct") {
     enum class alphabet { a, b, c, d, e };
     using uut = bounded_enum<alphabet, alphabet::a, alphabet::e>;
-
-    REQUIRE(uut::count == 5);
+    REQUIRE(uut::count() == 5);
 }
 
 TEST_CASE("Postfix increment") {

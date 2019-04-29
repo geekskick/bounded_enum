@@ -12,6 +12,7 @@ template<class ULType>
 class bounded_iterator {
   public:
     bounded_iterator() = delete;
+    ~bounded_iterator() = default;
     explicit bounded_iterator(ULType val) noexcept
       : m_parent_idx{ std::move(val) } {}
 
@@ -31,11 +32,10 @@ class bounded_iterator {
 template<typename EnumT, EnumT TMin, EnumT TMax>
 class bounded_enum {
   public:
-    static_assert(TMin <= TMax, "TMin must be <= TMax");
+  static_assert(TMin <= TMax, "TMin must be <= TMax");
     using type = EnumT;
     using ULType = typename std::underlying_type<EnumT>::type;
     using IterType = bounded_iterator<ULType>;
-
     //====== Rule of 7 ======
     // 1. dtor
     ~bounded_enum() = default;
@@ -44,7 +44,7 @@ class bounded_enum {
     bounded_enum() = default;
 
     explicit bounded_enum(ULType val) {
-        if (val > to_underlying(TMax) || val < to_underlying(TMin)) {
+        if (val > max_underlying() || val < min_underlying()) {
             std::stringstream ss;
             ss << "Restriction is that " << to_underlying(TMin) << " <= " << val << " <= " << to_underlying(TMax) << ".";
             throw std::runtime_error(ss.str());
@@ -52,8 +52,14 @@ class bounded_enum {
         m_val = from_underlying(val);
     }
 
-    explicit bounded_enum(EnumT val)
-      : m_val{ std::move(val) } {}
+    explicit bounded_enum(EnumT val){
+        if (val > max_enum() || val < min_enum()) {
+            std::stringstream ss;
+            ss << "Restriction is that " << min_underlying() << " <= " << to_underlying(val) << " <= " << max_underlying() << ".";
+            throw std::runtime_error(ss.str());
+        }
+        m_val = std::move(val);
+    }
 
     // 3. Copy ctor
     bounded_enum(const bounded_enum& other) = default;
@@ -64,7 +70,7 @@ class bounded_enum {
         if (other > TMax || other < TMin) {
             std::stringstream ss;
             ss << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]"
-               << " - assigning an EnumT must be in the range of " << min_underlying << " - " << max_underlying << ".";
+               << " - assigning an EnumT must be in the range of " << min_underlying() << " - " << max_underlying() << ".";
             throw std::runtime_error(ss.str());
         }
         m_val = other;
@@ -72,10 +78,10 @@ class bounded_enum {
     }
 
     bounded_enum& operator=(const ULType& other) {
-        if (other > max_underlying || other < min_underlying) {
+        if (other > max_underlying() || other < min_underlying()) {
             std::stringstream ss;
             ss << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]"
-               << " - assigning an EnumT must be in the range of " << min_underlying << " - " << max_underlying << ".";
+               << " - assigning an EnumT must be in the range of " << min_underlying() << " - " << max_underlying() << ".";
             throw std::runtime_error(ss.str());
         }
         m_val = from_underlying(other);
@@ -86,7 +92,7 @@ class bounded_enum {
     bounded_enum(bounded_enum&& other) {
         if (this != &other) {
             m_val = other.m_val;
-            other.m_val = other.min_enum;
+            other.m_val = other.min_enum();
         }
     }
 
@@ -94,7 +100,7 @@ class bounded_enum {
     bounded_enum& operator=(bounded_enum&& other) {
         if (this != &other) {
             m_val = other.m_val;
-            other.m_val = other.min_enum;
+            other.m_val = other.min_enum();
         }
         return *this;
     }
@@ -103,13 +109,13 @@ class bounded_enum {
 
     //=======================
     constexpr ULType underlying() const noexcept { return static_cast<ULType>(m_val); }
-    constexpr static ULType count{ static_cast<ULType>(TMax) + 1 };
-    constexpr static ULType max_underlying{ static_cast<ULType>(TMax) };
-    constexpr static ULType min_underlying{ static_cast<ULType>(TMin) };
-    constexpr static EnumT max_enum{ TMax };
-    constexpr static EnumT min_enum{ TMin };
+    constexpr static ULType count() noexcept { return static_cast<ULType>(TMax) + 1; }
+    constexpr static ULType max_underlying() noexcept{ return static_cast<ULType>(TMax); }
+    constexpr static ULType min_underlying() noexcept{ return static_cast<ULType>(TMin); }
+    constexpr static EnumT max_enum() noexcept{ return TMax; }
+    constexpr static EnumT min_enum() noexcept{ return  TMin; }
 
-    constexpr EnumT& operator*() { return m_val; }
+    constexpr EnumT& operator*() noexcept { return m_val; }
     constexpr const EnumT& operator*() const noexcept { return m_val; }
 
     constexpr const EnumT& get() const noexcept { return m_val; }
@@ -179,8 +185,8 @@ class bounded_enum {
     }
 
     //====== Iterators ======
-    constexpr static IterType begin() noexcept { return IterType(min_underlying); }
-    constexpr static IterType end() noexcept { return IterType(count); }
+    static constexpr IterType begin() noexcept { return IterType(min_underlying()); }
+    static constexpr IterType end() noexcept { return IterType(count()); }
 
   private:
     EnumT m_val{ TMin };
