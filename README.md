@@ -1,7 +1,7 @@
 # bounded_enum
 I made this because whenever I am using enums in c++ I always want extra functionality, such as iterating over them, and incrementing, and casting to/from an integer
 
-This header hopefully makes a step towards providing that.
+This header hopefully makes a step towards providing that, since the magic enum library is C++17 only.
 
 ## Functionality
 Create an enum with defined upper and lower bounds.
@@ -54,7 +54,7 @@ Move to the next enum value (works the same way with subtraction
 ```
 letter++;
 ++letter;
-letter = alphabet_bt::max_enum;
+letter = alphabet_bt::max_enum();
 REQUIRE_THROWS(++letter);
 REQUIRE_THROWS(letter++);
 ```
