@@ -41,7 +41,7 @@ class bounded_enum {
     ~bounded_enum() = default;
 
     // 2. ctor
-    bounded_enum() = default;
+    constexpr bounded_enum() = default;
 
     explicit bounded_enum(ULType val) {
         if (val > max_underlying() || val < min_underlying()) {
